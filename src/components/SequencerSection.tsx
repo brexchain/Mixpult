@@ -31,6 +31,8 @@ export default function SequencerSection({
   setTransDisplayMessage,
   compActiveBlockId
 }: SequencerSectionProps) {
+  const scrollContainerRef = React.useRef<HTMLDivElement>(null);
+
   const moveBlock = (index: number, direction: 'left' | 'right') => {
     if (direction === 'left' && index === 0) return;
     if (direction === 'right' && index === composition.length - 1) return;
@@ -44,6 +46,18 @@ export default function SequencerSection({
     
     const songName = songsData[temp.songKey]?.label || 'Song';
     setTransDisplayMessage(`↕ Umgereiht: "${songName}" rutscht nach ${direction === 'left' ? 'vorne' : 'hinten'}!`);
+  };
+
+  const scrollLeftFunc = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: -210, behavior: 'smooth' });
+    }
+  };
+
+  const scrollRightFunc = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({ left: 210, behavior: 'smooth' });
+    }
   };
 
   return (
@@ -130,147 +144,201 @@ export default function SequencerSection({
         </div>
 
         {/* Dynamic slots list */}
-        <div className="flex flex-row gap-3 overflow-x-auto pb-3 pt-1 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-zinc-950">
-          {composition.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-zinc-800/60 rounded-xl w-full min-h-[140px]">
-              <span className="text-zinc-500 text-[10.5px] font-sans">Geh herst, deine Spielistn is noch staubtrockn und leer!</span>
-              <span className="text-zinc-600 text-[8px] mt-1 font-mono max-w-[210px] leading-relaxed mx-auto uppercase">Druck do oben auf de Kacheln, um de Spielistn mit feinem Gequetsche aufzufülln!</span>
-            </div>
-          ) : (
-            composition.map((block, idx) => {
-              const song = songsData[block.songKey];
-              if (!song) return null;
-              const isCurrentlyPlayingBlock = compPlaybackActive && block.id === compActiveBlockId;
+        <div className="relative group">
+          {composition.length > 0 && (
+            <>
+              {/* Desktop Scroll Navigators */}
+              <button
+                type="button"
+                onClick={scrollLeftFunc}
+                className="absolute left-1 top-1/2 -translate-y-1/2 z-20 w-8 h-14 bg-zinc-950/90 hover:bg-zinc-900 border border-zinc-800 text-cyan-400 hover:text-white rounded-lg flex items-center justify-center font-black select-none cursor-pointer shadow-2xl opacity-80 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 active:scale-95 shrink-0"
+                title="Scroll links (Zruck)"
+              >
+                ◀
+              </button>
 
-              return (
-                <div
-                  key={`${block.id}-${idx}`}
-                  style={{ borderTopColor: song.color }}
-                  className={`w-[195px] shrink-0 bg-zinc-950 border border-zinc-850 rounded-lg p-3 border-t-[3.5px] transition-all flex flex-col justify-between
-                    ${isCurrentlyPlayingBlock 
-                      ? 'border-yellow-400 bg-yellow-950/15 shadow-[0_0_12px_rgba(234,179,8,0.22)]' 
-                      : 'hover:border-zinc-750'
-                    }`}
-                >
-                  {/* Slots card header with indices, reordering shifts and remove controls */}
-                  <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-zinc-900/60">
-                    <span className="text-[8.5px] font-mono text-zinc-400 font-extrabold tracking-wide uppercase">HADERN {idx + 1}</span>
-                    <div className="flex items-center gap-1">
-                      {/* Shifting sequence block rearrange */}
-                      <button
-                        id={`block-move-left-${block.id}`}
-                        onClick={() => moveBlock(idx, 'left')}
-                        disabled={idx === 0}
-                        className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-mono font-black border transition-all active:scale-90 cursor-pointer
-                          ${idx === 0 
-                            ? 'border-zinc-900 text-zinc-700 cursor-not-allowed opacity-20' 
-                            : 'border-zinc-800 text-cyan-400 bg-zinc-90 w-full bg-zinc-900 hover:bg-zinc-800'
-                          }`}
-                        title="Nach links schliafn"
-                      >
-                        ←
-                      </button>
-                      <button
-                        id={`block-move-right-${block.id}`}
-                        onClick={() => moveBlock(idx, 'right')}
-                        disabled={idx === composition.length - 1}
-                        className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-mono font-black border transition-all active:scale-90 cursor-pointer
-                          ${idx === composition.length - 1 
-                            ? 'border-zinc-900 text-zinc-700 cursor-not-allowed opacity-20' 
-                            : 'border-zinc-800 text-cyan-400 bg-zinc-90 w-full bg-zinc-900 hover:bg-zinc-800'
-                          }`}
-                        title="Nach rechts schliafn"
-                      >
-                        →
-                      </button>
-                      <button
-                        id={`remove-block-tab-${block.id}`}
-                        onClick={() => removeTimelineBlock(block.id)}
-                        className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold border border-red-950 text-red-500 bg-red-950/10 hover:bg-red-950/40 hover:border-red-800 transition active:scale-90 cursor-pointer"
-                        title="Ausm Set werfen"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Title row */}
-                  <div className="flex items-center gap-1.5 my-1">
-                    <span className="text-sm shrink-0">{song.emoji}</span>
-                    <span className="font-sans font-black text-[11.5px] text-white truncate max-w-[135px]" style={{ color: song.color || '#fff' }}>
-                      {song.label}
-                    </span>
-                  </div>
-
-                  {/* Custom parameters layout inside the card */}
-                  <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-zinc-900/60 text-[8.5px] font-mono">
-                    {/* Interactive BPM Setter */}
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-[7.5px] text-zinc-500 uppercase font-bold">GESCHWIND:</span>
-                      <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-850 px-1 py-0.5 rounded">
-                        <button
-                          id={`block-bpm-dec-tab-${block.id}`}
-                          onClick={() => updateTimelineBlock(block.id, { bpm: Math.max(60, block.bpm - 5) })}
-                          className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
-                        >
-                          -
-                        </button>
-                        <span className="font-bold text-zinc-350 text-[8px] min-w-[34px] text-center">{block.bpm} BPM</span>
-                        <button
-                          id={`block-bpm-inc-tab-${block.id}`}
-                          onClick={() => updateTimelineBlock(block.id, { bpm: Math.min(220, block.bpm + 5) })}
-                          className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Custom Duration BARS Controller */}
-                    <div className="flex items-center justify-between gap-1">
-                      <span className="text-[7.5px] text-zinc-500 uppercase font-bold">TAKTE:</span>
-                      <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-850 px-1 py-0.5 rounded">
-                        <button
-                          id={`block-bars-dec-tab-${block.id}`}
-                          onClick={() => updateTimelineBlock(block.id, { bars: Math.max(1, block.bars - 1) })}
-                          className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
-                          title="Zruckdrehn"
-                        >
-                          -
-                        </button>
-                        <span className="font-bold text-zinc-350 text-[8px] min-w-[34px] text-center">{block.bars} TAKTE</span>
-                        <button
-                          id={`block-bars-inc-tab-${block.id}`}
-                          onClick={() => updateTimelineBlock(block.id, { bars: Math.min(32, block.bars + 1) })}
-                          className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
-                          title="Fuaß aufs Gas"
-                        >
-                          +
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Lead Solo Selection */}
-                    <div className="flex items-center justify-between gap-1 mt-0.5">
-                      <span className="text-[7.5px] text-zinc-500 uppercase font-bold shrink-0">SOLO-STIMM:</span>
-                      <select
-                        id={`block-inst-select-${block.id}`}
-                        value={block.instIndex !== undefined ? block.instIndex : 0}
-                        onChange={(e) => updateTimelineBlock(block.id, { instIndex: parseInt(e.target.value) })}
-                        className="bg-zinc-900 text-cyan-400 border border-zinc-850 text-[8px] font-mono font-bold rounded px-1.5 py-0.5 outline-none cursor-pointer focus:border-cyan-500 hover:border-zinc-700 transition flex-1 max-w-[110px] truncate"
-                      >
-                        {instNames.map((name, i) => (
-                          <option key={i} value={i} className="bg-zinc-950 text-zinc-300 font-mono text-[8px]">
-                            {name}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+              <button
+                type="button"
+                onClick={scrollRightFunc}
+                className="absolute right-1 top-1/2 -translate-y-1/2 z-20 w-8 h-14 bg-zinc-950/90 hover:bg-zinc-900 border border-zinc-800 text-cyan-400 hover:text-white rounded-lg flex items-center justify-center font-black select-none cursor-pointer shadow-2xl opacity-80 md:opacity-0 group-hover:opacity-100 transition-opacity duration-300 active:scale-95 shrink-0"
+                title="Scroll rechts (Vuaß)"
+              >
+                ▶
+              </button>
+            </>
           )}
+
+          <div 
+            ref={scrollContainerRef}
+            onWheel={(e) => {
+              if (e.deltaY !== 0) {
+                e.currentTarget.scrollLeft += e.deltaY * 1.2;
+              }
+            }}
+            className="flex flex-row gap-3 overflow-x-auto pb-3 pt-1 px-1 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-zinc-950 scroll-smooth"
+          >
+            {composition.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-8 text-center border-2 border-dashed border-zinc-800/60 rounded-xl w-full min-h-[140px]">
+                <span className="text-zinc-500 text-[10.5px] font-sans">Geh herst, deine Spielistn is noch staubtrockn und leer!</span>
+                <span className="text-zinc-600 text-[8px] mt-1 font-mono max-w-[210px] leading-relaxed mx-auto uppercase">Druck do oben auf de Kacheln, um de Spielistn mit feinem Gequetsche aufzufülln!</span>
+              </div>
+            ) : (
+              composition.map((block, idx) => {
+                const song = songsData[block.songKey];
+                if (!song) return null;
+                const isCurrentlyPlayingBlock = compPlaybackActive && block.id === compActiveBlockId;
+
+                return (
+                  <div
+                    key={`${block.id}-${idx}`}
+                    style={{ borderTopColor: song.color }}
+                    className={`w-[195px] shrink-0 bg-zinc-950 border border-zinc-850 rounded-lg p-3 border-t-[3.5px] transition-all flex flex-col justify-between
+                      ${isCurrentlyPlayingBlock 
+                        ? 'border-yellow-400 bg-yellow-950/15 shadow-[0_0_12px_rgba(234,179,8,0.22)]' 
+                        : 'hover:border-zinc-750'
+                      }`}
+                  >
+                    {/* Slots card header with indices, reordering shifts and remove controls */}
+                    <div className="flex items-center justify-between mb-1.5 pb-1 border-b border-zinc-900/60">
+                      <span className="text-[8.5px] font-mono text-zinc-400 font-extrabold tracking-wide uppercase">HADERN {idx + 1}</span>
+                      <div className="flex items-center gap-1">
+                        {/* Shifting sequence block rearrange */}
+                        <button
+                          id={`block-move-left-${block.id}`}
+                          onClick={() => moveBlock(idx, 'left')}
+                          disabled={idx === 0}
+                          className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-mono font-black border transition-all active:scale-90 cursor-pointer
+                            ${idx === 0 
+                              ? 'border-zinc-900 text-zinc-700 cursor-not-allowed opacity-20' 
+                              : 'border-zinc-800 text-cyan-400 bg-zinc-90 w-full bg-zinc-900 hover:bg-zinc-800'
+                            }`}
+                          title="Nach links schliafn"
+                        >
+                          ←
+                        </button>
+                        <button
+                          id={`block-move-right-${block.id}`}
+                          onClick={() => moveBlock(idx, 'right')}
+                          disabled={idx === composition.length - 1}
+                          className={`w-5 h-5 rounded flex items-center justify-center text-[9px] font-mono font-black border transition-all active:scale-90 cursor-pointer
+                            ${idx === composition.length - 1 
+                              ? 'border-zinc-900 text-zinc-700 cursor-not-allowed opacity-20' 
+                              : 'border-zinc-800 text-cyan-400 bg-zinc-90 w-full bg-zinc-900 hover:bg-zinc-800'
+                            }`}
+                          title="Nach rechts schliafn"
+                        >
+                          →
+                        </button>
+                        <button
+                          id={`remove-block-tab-${block.id}`}
+                          onClick={() => removeTimelineBlock(block.id)}
+                          className="w-5 h-5 rounded flex items-center justify-center text-[11px] font-bold border border-red-950 text-red-500 bg-red-950/10 hover:bg-red-950/40 hover:border-red-800 transition active:scale-90 cursor-pointer"
+                          title="Ausm Set werfen"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Title row */}
+                    <div className="flex items-center gap-1.5 my-1">
+                      <span className="text-sm shrink-0">{song.emoji}</span>
+                      <span className="font-sans font-black text-[11.5px] text-white truncate max-w-[135px]" style={{ color: song.color || '#fff' }}>
+                        {song.label}
+                      </span>
+                    </div>
+
+                    {/* Custom parameters layout inside the card */}
+                    <div className="flex flex-col gap-1.5 mt-2 pt-2 border-t border-zinc-900/60 text-[8.5px] font-mono">
+                      {/* Interactive BPM Setter */}
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[7.5px] text-zinc-500 uppercase font-bold">GESCHWIND:</span>
+                        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-850 px-1 py-0.5 rounded">
+                          <button
+                            id={`block-bpm-dec-tab-${block.id}`}
+                            onClick={() => updateTimelineBlock(block.id, { bpm: Math.max(60, block.bpm - 5) })}
+                            className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
+                          >
+                            -
+                          </button>
+                          <span className="font-bold text-zinc-350 text-[8px] min-w-[34px] text-center">{block.bpm} BPM</span>
+                          <button
+                            id={`block-bpm-inc-tab-${block.id}`}
+                            onClick={() => updateTimelineBlock(block.id, { bpm: Math.min(220, block.bpm + 5) })}
+                            className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Custom Duration BARS Controller */}
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="text-[7.5px] text-zinc-500 uppercase font-bold">TAKTE:</span>
+                        <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-850 px-1 py-0.5 rounded">
+                          <button
+                            id={`block-bars-dec-tab-${block.id}`}
+                            onClick={() => updateTimelineBlock(block.id, { bars: Math.max(1, block.bars - 1) })}
+                            className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
+                            title="Zruckdrehn"
+                          >
+                            -
+                          </button>
+                          <span className="font-bold text-zinc-350 text-[8px] min-w-[34px] text-center">{block.bars} TAKTE</span>
+                          <button
+                            id={`block-bars-inc-tab-${block.id}`}
+                            onClick={() => updateTimelineBlock(block.id, { bars: Math.min(32, block.bars + 1) })}
+                            className="text-zinc-400 hover:text-white font-black cursor-pointer px-1 active:scale-90 transition-all text-[8px]"
+                            title="Fuaß aufs Gas"
+                          >
+                            +
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Lead Solo Selection */}
+                      <div className="flex items-center justify-between gap-1 mt-0.5">
+                        <span className="text-[7.5px] text-zinc-500 uppercase font-bold shrink-0">SOLO-STIMM:</span>
+                        <select
+                          id={`block-inst-select-${block.id}`}
+                          value={block.instIndex !== undefined ? block.instIndex : 0}
+                          onChange={(e) => updateTimelineBlock(block.id, { instIndex: parseInt(e.target.value) })}
+                          className="bg-zinc-900 text-cyan-400 border border-zinc-850 text-[8px] font-mono font-bold rounded px-1.5 py-0.5 outline-none cursor-pointer focus:border-cyan-500 hover:border-zinc-700 transition flex-1 max-w-[110px] truncate"
+                        >
+                          {instNames.map((name, i) => (
+                            <option key={i} value={i} className="bg-zinc-950 text-zinc-300 font-mono text-[8px]">
+                              {name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* Rhythm Preset Selection */}
+                      <div className="flex items-center justify-between gap-1 mt-0.5">
+                        <span className="text-[7.5px] text-zinc-500 uppercase font-bold shrink-0">RHYTHMUS:</span>
+                        <select
+                          id={`block-rhythm-select-${block.id}`}
+                          value={block.rhythmIndex !== undefined ? block.rhythmIndex : 0}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value);
+                            updateTimelineBlock(block.id, { rhythmIndex: val });
+                            setTransDisplayMessage(`🥁 Takt für Hadern #${idx + 1} eingestellt auf: ${rhythmLabels[rhythmOrder[val]] || rhythmOrder[val]}`);
+                          }}
+                          className="bg-zinc-900 text-emerald-400 border border-zinc-850 text-[8px] font-mono font-bold rounded px-1.5 py-0.5 outline-none cursor-pointer focus:border-emerald-500 hover:border-zinc-700 transition flex-1 max-w-[110px] truncate"
+                        >
+                          {rhythmOrder.map((r, i) => (
+                            <option key={r} value={i} className="bg-zinc-950 text-zinc-300 font-mono text-[8px]">
+                              {rhythmLabels[r] || r} ({rhythmTags[r] || 'Preset'})
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -31,7 +31,7 @@ export default function MixQueuePlanner({
   transitionActive,
 }: MixQueuePlannerProps) {
   // Calculate dynamic rhythm & tempo compatibility for all other songs
-  const currentSong = songsData[activeSongKey] || songsData.house || Object.values(songsData)[0];
+  const currentSong = songsData[activeSongKey] || songsData.beatcatcher || Object.values(songsData)[0];
 
   const [activeFamily, setActiveFamily] = useState<'all' | 'club' | 'vintage' | 'reggae' | 'latin'>('all');
 

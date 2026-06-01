@@ -52,7 +52,7 @@ class AudioEngineClass {
   // Scheduling parameters
   public nextNoteTime: number = 0;
   public currentStep: number = 0;
-  public activeSongKey: string = 'house';
+  public activeSongKey: string = 'beatcatcher';
   public pendingSongKey: string | null = null;
   
   // FX parameters
@@ -623,7 +623,7 @@ class AudioEngineClass {
         if (this.onBpmCallback) this.onBpmCallback(this.tempo);
       }
       
-      const songData = songsData[this.activeSongKey] || songsData.house;
+      const songData = songsData[this.activeSongKey] || songsData.beatcatcher;
       const activeInst = this.liveInstOverride || songData.inst;
       const drumType = songData.drumType;
       
