@@ -1,0 +1,8 @@
+{
+  "name": "Remix: AuerPark Rig DJ Mixer",
+  "description": "Interactive Web Audio live-jam drum and synth DJ mixer with customizable favorite tiles, draggable mix queues, rhythm manipulation, and automated transition controls.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
