@@ -501,6 +501,48 @@ export const songsData: Record<string, Song> = {
     tags: ['PolyWirbel', 'OidaSchwung'],
     cat: 'latin'
   },
+  samba: {
+    key: 'samba',
+    bpm: 130,
+    drumType: 'samba',
+    bass: [1, 0, 1, 0, 5, 0, 5, 0, 1, 0, 1, 0, 5, 0, 5, 0],
+    melody: [3, 0, 5, 0, 6, 0, 8, 0, 7, 0, 5, 0, 6, 5, 3, 0],
+    scale: [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88, 523.25],
+    inst: 'sax',
+    color: '#22c55e',
+    emoji: '🇧🇷',
+    label: 'Samba de Copacabana',
+    tags: ['Samba', 'Batucada', 'Rio-Vibe'],
+    cat: 'latin'
+  },
+  caboclo: {
+    key: 'caboclo',
+    bpm: 100,
+    drumType: 'caboclo',
+    bass: [1, 0, 0, 0, 0, 1, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0],
+    melody: [1, 0, 3, 0, 5, 0, 3, 0, 4, 3, 1, 0, 0, 0, 1, 0],
+    scale: [220.00, 246.94, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25],
+    inst: 'flute',
+    color: '#eab308',
+    emoji: '🏹',
+    label: 'Caboclo-Waldgesang',
+    tags: ['Afro-Ijexá', 'Wald-Geist', 'Mystic'],
+    cat: 'world'
+  },
+  capoeira: {
+    key: 'capoeira',
+    bpm: 115,
+    drumType: 'capoeira',
+    bass: [1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0],
+    melody: [1, 1, 3, 0, 1, 1, 3, 0, 1, 1, 3, 0, 1, 3, 1, 0],
+    scale: [164.81, 196.00, 220.00, 261.63, 293.66, 329.63, 392.00, 440.00],
+    inst: 'surf',
+    color: '#3b82f6',
+    emoji: '🤸',
+    label: 'Capoeira-Schlag (Berimbau)',
+    tags: ['Berimbau', 'Roda-Katz', 'Angola'],
+    cat: 'world'
+  }
 
 };
 
@@ -515,10 +557,13 @@ export const rhythmSteps: Record<string, number> = {
   '2/4': 8,
   rumba: 16,
   dembow: 16,
-  clave: 16
+  clave: 16,
+  samba: 16,
+  ijexa: 16,
+  capoeira: 16
 };
 
-export const rhythmOrder = ['4/4', '3/4', '7/8', '5/4', '6/8', '9/8', '12/8', '2/4', 'rumba', 'dembow', 'clave'];
+export const rhythmOrder = ['4/4', '3/4', '7/8', '5/4', '6/8', '9/8', '12/8', '2/4', 'rumba', 'dembow', 'clave', 'samba', 'ijexa', 'capoeira'];
 
 export const rhythmLabels: Record<string, string> = {
   '4/4': 'Fetzn-Takt (4/4)',
@@ -531,7 +576,10 @@ export const rhythmLabels: Record<string, string> = {
   '2/4': 'Marsch-Bier (2/4)',
   rumba: 'Schmalz-Rumba',
   dembow: 'Reggaeton-Wackler',
-  clave: 'Salsa-Clave'
+  clave: 'Salsa-Clave',
+  samba: 'Copacabana-Samba',
+  ijexa: 'Ijexá-Caboclo',
+  capoeira: 'São Bento Capoeira'
 };
 
 export const rhythmTags: Record<string, string> = {
@@ -545,7 +593,10 @@ export const rhythmTags: Record<string, string> = {
   '2/4': 'Bier',
   rumba: 'Heiß',
   dembow: 'Wobbel',
-  clave: 'Scharf'
+  clave: 'Scharf',
+  samba: 'Uplifting',
+  ijexa: 'Spiritual',
+  capoeira: 'Akrobatisch'
 };
 
 export const instOrder = ['', 'brass', 'sax', 'synth', 'acid', 'chip', 'flute', 'surf', 'strings'];

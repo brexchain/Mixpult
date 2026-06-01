@@ -727,6 +727,21 @@ class AudioEngineClass {
           if (step === 4 || step === 12) dS = true;
           if (step === 0 || step === 3 || step === 6 || step === 10 || step === 12) dCL = true;
           if (step % 2 === 0) dHC = true;
+        } else if (activeRhythm === 'samba') {
+          if (step === 2 || step === 6 || step === 10 || step === 14) dK = true;
+          if (step === 2 || step === 5 || step === 8 || step === 11 || step === 14) dS = true;
+          if (step % 2 === 0) dHC = true;
+          if (step === 0 || step === 3 || step === 6 || step === 9 || step === 12) dCB = true;
+        } else if (activeRhythm === 'ijexa') {
+          if (step === 0 || step === 7 || step === 11) dK = true;
+          if (step === 4 || step === 12) dS = true;
+          if (step === 0 || step === 2 || step === 5 || step === 8 || step === 10 || step === 13) dCB = true;
+          if (step % 2 === 0) dHC = true;
+        } else if (activeRhythm === 'capoeira') {
+          if (step === 0 || step === 8) dK = true;
+          if (step === 4 || step === 12) dS = true;
+          if (step === 0 || step === 2 || step === 6 || step === 8 || step === 10 || step === 14) dCL = true;
+          if (step % 2 === 0) dHC = true;
         } else {
           // Default fallbacks with specific styles
           if (drumType === 'fourfloor') {
@@ -811,6 +826,21 @@ class AudioEngineClass {
             if (step === 4 || step === 12) dS = true;
             if (step % 2 === 0) dHC = true;
             if (step % 2 === 0) dCB = true;
+          } else if (drumType === 'samba') {
+            if (step === 2 || step === 6 || step === 10 || step === 14) dK = true;
+            if (step === 2 || step === 5 || step === 8 || step === 11 || step === 14) dS = true;
+            if (step % 2 === 0) dHC = true;
+            if (step === 0 || step === 3 || step === 6 || step === 9 || step === 12) dCB = true;
+          } else if (drumType === 'caboclo') {
+            if (step === 0 || step === 7 || step === 11) dK = true;
+            if (step === 4 || step === 12) dS = true;
+            if (step === 0 || step === 2 || step === 5 || step === 8 || step === 10 || step === 13) dCB = true;
+            if (step % 2 === 0) dHC = true;
+          } else if (drumType === 'capoeira') {
+            if (step === 0 || step === 8) dK = true;
+            if (step === 4 || step === 12) dS = true;
+            if (step === 0 || step === 2 || step === 6 || step === 8 || step === 10 || step === 14) dCL = true;
+            if (step % 2 === 0) dHC = true;
           } else {
             // General standard fallback
             if (step === 0 || step === 8) dK = true;

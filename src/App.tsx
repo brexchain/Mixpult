@@ -8,8 +8,15 @@ import { motion, AnimatePresence } from 'motion/react';
 import { 
   Play, Pause, Zap, Disc, Trash, Plus, RotateCcw, Volume2, VolumeX,
   Star, Sliders, Music, Radio, Sparkles, AlertCircle, RefreshCw, Layers,
-  Share2, Download, Check, Copy, Send, Sun, Moon
+  Share2, Download, Check, Copy, Send, Sun, Moon, Save
 } from 'lucide-react';
+
+interface SavedRig {
+  id: string;
+  name: string;
+  timestamp: string;
+  payload: SharedRigData;
+}
 
 import { songsData, categories, rhythmOrder, rhythmLabels, rhythmTags, instOrder, instNames, instIcons } from './songsData';
 import { Song, CompositionBlock, QueuedMix, FavoriteTile, MixerStems } from './types';
@@ -721,6 +728,18 @@ export default function App() {
   const [showManualImport, setShowManualImport] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
 
+  // Local saves system states
+  const [savedRigs, setSavedRigs] = useState<SavedRig[]>(() => {
+    try {
+      const data = localStorage.getItem('schrammel_saved_rigs');
+      return data ? JSON.parse(data) : [];
+    } catch (e) {
+      return [];
+    }
+  });
+  const [localSaveName, setLocalSaveName] = useState('');
+  const [showLocalSavesDropdown, setShowLocalSavesDropdown] = useState(false);
+
   // Selected browse category
   const [selectedCategory, setSelectedCategory] = useState('all');
   
@@ -863,6 +882,41 @@ export default function App() {
     
     // Clear URL query parameter to avoid infinite re-prompts on page updates
     window.history.replaceState({}, document.title, window.location.pathname);
+  };
+
+  const handleSaveRigLocally = (nameInput?: string) => {
+    const defaultLabel = composition.length > 0 ? (songsData[activeSongKey]?.label || activeSongKey) : 'unbenannt';
+    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const finalName = nameInput?.trim() || `Rig ${defaultLabel} (${timeStr})`;
+    const payload: SharedRigData = {
+      mixQueue,
+      composition,
+      tempo,
+      activeSongKey,
+      globalRhythm,
+      drumDensity,
+      drumHat
+    };
+    const newSave: SavedRig = {
+      id: 'rig-' + Date.now(),
+      name: finalName,
+      timestamp: new Date().toLocaleDateString('de-AT') + ' ' + timeStr,
+      payload
+    };
+    const updated = [newSave, ...savedRigs];
+    setSavedRigs(updated);
+    localStorage.setItem('schrammel_saved_rigs', JSON.stringify(updated));
+    setTransDisplayMessage(`💾 Jam "${finalName}" lokal gspeichert! 🏕️`);
+  };
+
+  const handleDeleteRigLocally = (id: string) => {
+    const target = savedRigs.find(r => r.id === id);
+    const updated = savedRigs.filter(r => r.id !== id);
+    setSavedRigs(updated);
+    localStorage.setItem('schrammel_saved_rigs', JSON.stringify(updated));
+    if (target) {
+      setTransDisplayMessage(`🗑️ Jam "${target.name}" außeghaun.`);
+    }
   };
 
   const handleZValueChange = (val: number) => {
@@ -2388,6 +2442,70 @@ export default function App() {
                       </div>
                     </div>
                   )}
+
+                  {/* LOCAL SAVES PANEL */}
+                  <div className="mt-4 pt-3 border-t border-zinc-900 text-left">
+                    <div className="flex items-center gap-1.5 mb-2">
+                      <Save className="w-3.5 h-3.5 text-cyan-400" />
+                      <h4 className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase font-mono">
+                        |💾 EIGENE JAMS LOKAL SPEICHERN & LADEN|
+                      </h4>
+                    </div>
+                    
+                    {/* Save New Form */}
+                    <div className="flex gap-1.5 mb-3 bg-zinc-900/40 p-1.5 rounded border border-zinc-855">
+                      <input
+                        type="text"
+                        placeholder="Nama fia dei Reihung (z.B. Berg-Mix #1)"
+                        value={localSaveName}
+                        onChange={(e) => setLocalSaveName(e.target.value)}
+                        className="flex-grow bg-zinc-950 text-zinc-100 text-[9.5px] p-1.5 px-2 rounded border border-zinc-850 focus:outline-none focus:border-cyan-500 font-sans"
+                      />
+                      <button
+                        onClick={() => {
+                          handleSaveRigLocally(localSaveName);
+                          setLocalSaveName('');
+                        }}
+                        className="bg-cyan-950 hover:bg-cyan-500 hover:text-black hover:border-cyan-500 text-cyan-300 border border-cyan-800 text-[9px] p-1.5 px-3 rounded font-bold transition-all shrink-0 cursor-pointer active:scale-95 flex items-center gap-1"
+                      >
+                        <Save className="w-3 h-3" />
+                        SPEICHERN
+                      </button>
+                    </div>
+
+                    {/* List of Saves */}
+                    {savedRigs.length === 0 ? (
+                      <div className="text-[8.5px] text-zinc-550 text-center font-mono py-2 rounded bg-zinc-900/10 border border-dashed border-zinc-900">
+                        KEINE LOKALEN SPEICHERUNGEN VORHANDEN. TRAG INHALT EIN & SPEICHERE DEINEN JAM LOKAL!
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[160px] overflow-y-auto pr-1">
+                        {savedRigs.map((rig) => (
+                          <div key={rig.id} className="flex items-center justify-between bg-zinc-900/50 p-1.5 px-2 rounded border border-zinc-850/60 hover:border-cyan-500/40 transition-all text-left group">
+                            <button
+                              onClick={() => handleImportSharedRig(rig.payload)}
+                              className="flex-grow flex flex-col min-w-0 pr-2 transition hover:text-cyan-300 cursor-pointer text-left focus:outline-none"
+                              title="Diesen Jam jetzt laden"
+                            >
+                              <span className="text-[9.5px] font-bold text-zinc-300 group-hover:text-cyan-300 truncate font-sans tracking-wide leading-tight">
+                                {rig.name}
+                              </span>
+                              <span className="text-[7.5px] text-zinc-500 font-mono mt-0.5 leading-none block">
+                                ⏱️ {rig.timestamp} • {rig.payload.composition?.length || 0} Slots
+                              </span>
+                            </button>
+                            <button
+                              onClick={() => handleDeleteRigLocally(rig.id)}
+                              className="w-4 h-4 rounded bg-red-950/45 hover:bg-red-500 hover:text-black text-red-400 border border-red-900/30 flex items-center justify-center text-[9px] font-mono leading-none transition-all active:scale-90 shrink-0 cursor-pointer"
+                              title="Aus local Speicher löschen"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -2765,6 +2883,70 @@ export default function App() {
                         </span>
                       </div>
                     )}
+
+                    {/* LOCAL SAVES PANEL */}
+                    <div className="mt-4 pt-3 border-t border-zinc-900 text-left">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <Save className="w-3.5 h-3.5 text-cyan-400" />
+                        <h4 className="text-[10px] font-bold text-cyan-400 tracking-wider uppercase font-mono">
+                          |💾 EIGENE JAMS LOKAL SPEICHERN & LADEN|
+                        </h4>
+                      </div>
+                      
+                      {/* Save New Form */}
+                      <div className="flex gap-1.5 mb-3 bg-zinc-900/40 p-1.5 rounded border border-zinc-855">
+                        <input
+                          type="text"
+                          placeholder="Nama fia dei Reihung (z.B. Berg-Mix #1)"
+                          value={localSaveName}
+                          onChange={(e) => setLocalSaveName(e.target.value)}
+                          className="flex-grow bg-zinc-950 text-zinc-100 text-[9.5px] p-1.5 px-2 rounded border border-zinc-850 focus:outline-none focus:border-cyan-500 font-sans"
+                        />
+                        <button
+                          onClick={() => {
+                            handleSaveRigLocally(localSaveName);
+                            setLocalSaveName('');
+                          }}
+                          className="bg-cyan-950 hover:bg-cyan-500 hover:text-black hover:border-cyan-500 text-cyan-300 border border-cyan-800 text-[9px] p-1.5 px-3 rounded font-bold transition-all shrink-0 cursor-pointer active:scale-95 flex items-center gap-1"
+                        >
+                          <Save className="w-3 h-3" />
+                          SPEICHERN
+                        </button>
+                      </div>
+
+                      {/* List of Saves */}
+                      {savedRigs.length === 0 ? (
+                        <div className="text-[8.5px] text-zinc-550 text-center font-mono py-2 rounded bg-zinc-900/10 border border-dashed border-zinc-900">
+                          KEINE LOKALEN SPEICHERUNGEN VORHANDEN. TRAG INHALT EIN & SPEICHERE DEINEN JAM LOKAL!
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-[160px] overflow-y-auto pr-1">
+                          {savedRigs.map((rig) => (
+                            <div key={rig.id} className="flex items-center justify-between bg-zinc-900/50 p-1.5 px-2 rounded border border-zinc-850/60 hover:border-cyan-500/40 transition-all text-left group">
+                              <button
+                                onClick={() => handleImportSharedRig(rig.payload)}
+                                className="flex-grow flex flex-col min-w-0 pr-2 transition hover:text-cyan-300 cursor-pointer text-left focus:outline-none"
+                                title="Diesen Jam jetzt laden"
+                              >
+                                <span className="text-[9.5px] font-bold text-zinc-300 group-hover:text-cyan-300 truncate font-sans tracking-wide leading-tight">
+                                  {rig.name}
+                                </span>
+                                <span className="text-[7.5px] text-zinc-500 font-mono mt-0.5 leading-none block">
+                                  ⏱️ {rig.timestamp} • {rig.payload.composition?.length || 0} Slots
+                                </span>
+                              </button>
+                              <button
+                                onClick={() => handleDeleteRigLocally(rig.id)}
+                                className="w-4 h-4 rounded bg-red-950/45 hover:bg-red-500 hover:text-black text-red-400 border border-red-900/30 flex items-center justify-center text-[9px] font-mono leading-none transition-all active:scale-90 shrink-0 cursor-pointer"
+                                title="Aus local Speicher löschen"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
               )}
