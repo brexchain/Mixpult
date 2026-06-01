@@ -15,7 +15,7 @@ export interface Song {
   emoji: string;
   label: string;
   tags: string[];
-  cat: 'club' | 'world' | 'vintage' | 'reggae' | 'latin';
+  cat: 'club' | 'world' | 'vintage' | 'reggae' | 'latin' | 'minimal';
 }
 
 export interface CompositionBlock {

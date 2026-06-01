@@ -119,10 +119,11 @@ export default function SequencerSection({
                 id={`direct-seq-add-tab-${key}`}
                 key={key}
                 onClick={() => addToTimeline(key)}
-                className="bg-zinc-90 w-24 bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-350 px-2.5 py-1.5 rounded-lg text-[9.5px] font-sans transition-all flex items-center gap-1 justify-center cursor-pointer shrink-0"
+                className="w-28 bg-zinc-900 border border-zinc-850 hover:border-zinc-700 text-zinc-350 px-2.5 py-1.5 rounded-lg text-[9.5px] font-sans transition-all flex items-center gap-1 justify-center cursor-pointer shrink-0"
               >
                 <span>{songsData[key].emoji}</span>
                 <span className="truncate">{songsData[key].label}</span>
+                <span className="text-[7.5px] font-mono font-black text-amber-400 shrink-0">({songsData[key].bpm})</span>
               </button>
             ))}
           </div>

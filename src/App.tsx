@@ -405,7 +405,7 @@ export default function App() {
   const [globalRhythm, setGlobalRhythm] = useState('4/4');
   const [drumDensity, setDrumDensity] = useState<'sparse' | 'normal' | 'full'>('normal');
   const [drumHat, setDrumHat] = useState<'off' | 'mixed' | 'open'>('mixed');
-  const [activeSongKey, setActiveSongKey] = useState('house');
+  const [activeSongKey, setActiveSongKey] = useState('beatcatcher');
   const [pendingSongKey, setPendingSongKey] = useState<string | null>(null);
   
   // Custom FX Toggle state
@@ -423,8 +423,8 @@ export default function App() {
   const [leadVol, setLeadVol] = useState(0.8);
   const [masterVol, setMasterVol] = useState(0.5);
 
-  const [kickMute, setKickMute] = useState(true);
-  const [snareMute, setSnareMute] = useState(true);
+  const [kickMute, setKickMute] = useState(false);
+  const [snareMute, setSnareMute] = useState(false);
   const [subMute, setSubMute] = useState(true);
   const [leadMute, setLeadMute] = useState(false);
   const [masterMute, setMasterMute] = useState(false);
@@ -451,7 +451,7 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<'mixer' | 'library' | 'performance' | 'sequencer'>('mixer');
 
   // NEW FEATURES: Favorite pinned tiles + Automated Mix queue states
-  const [favorites, setFavorites] = useState<string[]>(['mesecina', 'techno', 'house', 'dub']);
+  const [favorites, setFavorites] = useState<string[]>(['beatcatcher', 'minimalist', 'ambientdrone', 'mesecina', 'techno', 'house', 'dub']);
   const [mixQueue, setMixQueue] = useState<QueuedMix[]>([
     {
       id: 'init-1',
@@ -470,9 +470,11 @@ export default function App() {
   ]);
 
   // Composition / Sequence Sequencer Timeline Array
-  const [timelineBlockCounter, setTimelineBlockCounter] = useState(1);
+  const [timelineBlockCounter, setTimelineBlockCounter] = useState(3);
   const [composition, setComposition] = useState<CompositionBlock[]>([
-    { id: 0, songKey: 'house', bpm: 124, bars: 8, instIndex: 0, rhythmIndex: 0, kickMute: true, snareMute: true }
+    { id: 0, songKey: 'beatcatcher', bpm: 120, bars: 8, instIndex: 0, rhythmIndex: 0, kickMute: false, snareMute: false },
+    { id: 1, songKey: 'minimalist', bpm: 122, bars: 8, instIndex: 0, rhythmIndex: 0, kickMute: false, snareMute: false },
+    { id: 2, songKey: 'ambientdrone', bpm: 100, bars: 8, instIndex: 0, rhythmIndex: 0, kickMute: false, snareMute: false }
   ]);
   const [compPlaybackActive, setCompPlaybackActive] = useState(false);
   const [compActiveBlockId, setCompActiveBlockId] = useState<number | null>(null);
@@ -1234,20 +1236,6 @@ export default function App() {
   const prevBlock = activeIdx > 0 ? composition[activeIdx - 1] : null;
   const nextBlock = activeIdx !== -1 && activeIdx + 1 < composition.length ? composition[activeIdx + 1] : null;
 
-  const swapTimelineActiveAndNext = () => {
-    if (!activeBlock || !nextBlock) return;
-    const activeIdxInComp = composition.findIndex(b => b.id === activeBlock.id);
-    const nextIdxInComp = composition.findIndex(b => b.id === nextBlock.id);
-    if (activeIdxInComp !== -1 && nextIdxInComp !== -1) {
-      const updated = [...composition];
-      const temp = updated[activeIdxInComp];
-      updated[activeIdxInComp] = updated[nextIdxInComp];
-      updated[nextIdxInComp] = temp;
-      setComposition(updated);
-      setTransDisplayMessage(`⇅ Swapped Slots: ${songsData[activeBlock.songKey]?.label} ⇄ ${songsData[nextBlock.songKey]?.label}`);
-    }
-  };
-
   return (
     <div 
       id="pioneer-rig-container" 
@@ -1297,22 +1285,6 @@ export default function App() {
               NÄCHSTA HADERN
             </button>
 
-            {/* Swap Active & Next Block Button (Interchange) */}
-            <button
-              id="header-swap-blocks-btn"
-              onClick={swapTimelineActiveAndNext}
-              disabled={!activeBlock || !nextBlock}
-              className={`h-7 px-2 rounded-lg font-mono font-black text-[9px] tracking-wider flex items-center justify-center gap-1 transition-all active:scale-95 cursor-pointer shadow-sm border
-                ${(!activeBlock || !nextBlock)
-                  ? 'border-zinc-900 bg-zinc-950/20 text-zinc-600 cursor-not-allowed opacity-40'
-                  : 'border-cyan-500/80 text-cyan-400 bg-zinc-950/40 hover:bg-cyan-950/20 hover:border-cyan-400'
-                }`}
-              title="Bockshorn tauschn: Jetziges und náchstes Liad austauschen"
-            >
-              <span className="text-[10px]">⇄</span>
-              <span>TAUSCHN</span>
-            </button>
-
             {/* Panic Stop Reset */}
             <button
               id="main-panic-btn"
@@ -1358,9 +1330,13 @@ export default function App() {
                 }
               </span>
 
+              <span className="truncate text-[9.5px] font-black shrink-0 flex items-center gap-1 justify-center max-w-[32%] text-center mx-1">
+                {getQueueInfo().now} <span className="text-zinc-650 font-black text-[8px] mx-0.5">➔</span> <span className="text-pink-400 font-black">{getQueueInfo().next}</span>
+              </span>
+
               {/* Centered pulsing mini bar indicator to give that gorgeous physical pulsing feeling */}
               {activeBlock && !isHeaderStatusCardMinimized && (
-                <span id="header-middle-bar-pulse" className="flex items-center justify-center gap-[2.5px] px-1.5 py-0.5 bg-zinc-900/50 rounded border border-zinc-800/65 mx-1 shrink-0">
+                <span id="header-middle-bar-pulse" className="flex items-center justify-end gap-[2.5px] px-1.5 py-0.5 bg-zinc-900/50 rounded border border-zinc-800/65 ml-1 shrink-0">
                   {Array.from({ length: activeBlock.bars }).map((_, i) => {
                     const isPlayingTimeline = isPlaying && compPlaybackActive;
                     const isCurrent = isPlayingTimeline && i === compActiveBlockStep;
@@ -1384,10 +1360,6 @@ export default function App() {
                   })}
                 </span>
               )}
-
-              <span className="truncate text-[9.5px] font-black shrink-0 flex items-center gap-1 justify-end max-w-[32%] text-right">
-                {getQueueInfo().now} <span className="text-zinc-650 font-black text-[8px] mx-0.5">➔</span> <span className="text-pink-400 font-black">{getQueueInfo().next}</span>
-              </span>
             </p>
           </div>
 
@@ -1421,12 +1393,12 @@ export default function App() {
                     e.target.value = "";
                   }
                 }}
-                className="bg-zinc-950 text-emerald-400 border border-zinc-800 text-[8px] font-mono font-black rounded px-1.5 py-0.5 max-w-[85px] outline-none cursor-pointer focus:border-cyan-500 hover:bg-zinc-900 transition-colors h-[22px]"
+                className="bg-zinc-950 text-emerald-400 border border-zinc-800 text-[8px] font-mono font-black rounded px-1.5 py-0.5 max-w-[110px] outline-none cursor-pointer focus:border-cyan-500 hover:bg-zinc-900 transition-colors h-[22px]"
               >
                 <option value="" disabled className="text-zinc-650">➕ REIN</option>
                 {Object.keys(songsData).map(key => (
                   <option key={key} value={key} className="bg-zinc-950 text-zinc-300 select-none">
-                    {songsData[key].emoji} {songsData[key].label}
+                    {songsData[key].emoji} {songsData[key].label} ({songsData[key].bpm} BPM)
                   </option>
                 ))}
               </select>

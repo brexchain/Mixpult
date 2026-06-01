@@ -2,6 +2,7 @@ import { Song, Category } from './types';
 
 export const categories: Category[] = [
   { id: 'all', label: '🎵 OIS BEINAND' },
+  { id: 'minimal', label: '🌱 INTRO & BEAT-CATCHER' },
   { id: 'club', label: '🔥 DISKO-HUDRIWUDRI' },
   { id: 'world', label: '🌍 SCHMANKERL-WELT' },
   { id: 'vintage', label: '📻 SCHRAMMELN & HADERN' },
@@ -10,6 +11,48 @@ export const categories: Category[] = [
 ];
 
 export const songsData: Record<string, Song> = {
+  beatcatcher: {
+    key: 'beatcatcher',
+    bpm: 120,
+    drumType: 'fourfloor',
+    bass: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    melody: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    scale: [110.00, 130.81, 146.83, 164.81, 196.00, 220.00, 246.94, 261.63],
+    inst: 'synth',
+    color: '#06b6d4',
+    emoji: '⏱️',
+    label: 'Takt-Klopfer (Metronome Intro)',
+    tags: ['Minimal', 'Intro', 'PureBeat'],
+    cat: 'minimal'
+  },
+  minimalist: {
+    key: 'minimalist',
+    bpm: 122,
+    drumType: 'house',
+    bass: [1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0],
+    melody: [0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0, 0, 0, 3, 0],
+    scale: [110.00, 130.81, 146.83, 164.81, 196.00, 220.00, 246.94, 261.63],
+    inst: 'acid',
+    color: '#a855f7',
+    emoji: '🌱',
+    label: 'Eckn-Steher Minimal Intro',
+    tags: ['Sparse', 'DeepText', 'Hypnotic'],
+    cat: 'minimal'
+  },
+  ambientdrone: {
+    key: 'ambientdrone',
+    bpm: 100,
+    drumType: 'standard',
+    bass: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    melody: [1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0],
+    scale: [73.42, 82.41, 98.00, 110.00, 123.47, 130.81, 146.83, 164.81],
+    inst: 'strings',
+    color: '#10b981',
+    emoji: '☁️',
+    label: 'Hüttn-Waberer Ambient Drone',
+    tags: ['Ambient', 'Intro', 'Warm-Pad'],
+    cat: 'minimal'
+  },
   mesecina: {
     key: 'mesecina',
     bpm: 125,
@@ -457,7 +500,8 @@ export const songsData: Record<string, Song> = {
     label: 'Fela-Trommel-Gschäft',
     tags: ['PolyWirbel', 'OidaSchwung'],
     cat: 'latin'
-  }
+  },
+
 };
 
 export const rhythmSteps: Record<string, number> = {

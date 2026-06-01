@@ -29,8 +29,8 @@ class AudioEngineClass {
     volume: number;
     mute: boolean;
   }> = {
-    kick: { gainNode: null, volume: 1.0, mute: true },
-    snare: { gainNode: null, volume: 0.8, mute: true },
+    kick: { gainNode: null, volume: 1.0, mute: false },
+    snare: { gainNode: null, volume: 0.8, mute: false },
     sub: { gainNode: null, distortionNode: null, volume: 0.7, mute: true },
     lead: { gainNode: null, volume: 0.8, mute: false },
   };
@@ -125,8 +125,8 @@ class AudioEngineClass {
     this.stems.lead.gainNode = this.ctx.createGain();
     
     // Defaults matching the mixer buttons
-    this.stems.kick.gainNode.gain.value = 0; // Off/muted initially
-    this.stems.snare.gainNode.gain.value = 0; // Off/muted initially
+    this.stems.kick.gainNode.gain.value = 1.0; // Activated initially
+    this.stems.snare.gainNode.gain.value = 0.8; // Activated initially
     this.stems.sub.gainNode.gain.value = 0; // Sub starts OFF/muted
     this.stems.lead.gainNode.gain.value = 0.8; // Lead starts ON
     
